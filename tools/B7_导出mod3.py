@@ -60,7 +60,7 @@ def precheck(log, problems):
     except Exception:
         bmesh = None
     pat = re.compile(r"^MhBone_\d{3}$")
-    # 描边材质白名单：Outline 或 Outline_<颜色>（照抄 Alf 的命名；与 o12 的 mrl3 新建条目同名）
+    # 描边材质白名单：Outline 或 Outline_<颜色>（照抄 参考件 的命名；与 o12 的 mrl3 新建条目同名）
     OUTLINE_MAT = re.compile(r"^Outline(_[A-Za-z0-9]+)?$")
     targets = sorted([c for c in bpy.data.collections if c.name.endswith(".mod3")],
                      key=lambda x: x.name)
@@ -101,7 +101,7 @@ def precheck(log, problems):
                 problems.append("%s: 没材质 (NoMaterialOnSubMesh)" % (o.name,))
             elif not (pat.match(me.materials[0].name)
                       or me.materials[0].name.startswith("Ch_")
-                      # ★ 描边材质是自定义名（不在游戏全局字典里，Alf 的 Outline_* 也一样），
+                      # ★ 描边材质是自定义名（不在游戏全局字典里，参考件 的 Outline_* 也一样），
                       #   白名单放行；见 _outline\o1/o12 与调研报告 §4.6
                       or OUTLINE_MAT.match(me.materials[0].name)):
                 problems.append("%s: 材质名可疑 %s" % (o.name, me.materials[0].name))

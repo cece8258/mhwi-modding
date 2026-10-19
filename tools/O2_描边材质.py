@@ -16,26 +16,26 @@ except ImportError as _e:
 r"""
 O2_描边材质.py — 在成品包 4 个 mrl3 里新建描边材质 `Outline_Black`
 =====================================================================
-做法（照抄 `_模组调研\epv与描边_调研.md` B 部分 + 本次 _outline\o1/o3/o12 复核）：
+做法（照抄 `本项目调研记录\epv与描边_调研.md` B 部分 + 本次 _outline\o1/o3/o12 复核）：
 
   1. **复用死条目**：每个部位挑 `Ch_Standard_Mt__4`（非该部位 mod3 使用的材质、
-     mmtr=PL_Mt、blockSize=752、resourceCount=24）——与 Alf 的描边材质
+     mmtr=PL_Mt、blockSize=752、resourceCount=24）——与 参考件 的描边材质
      `Outline_Brown` 的 mmtrHash / shaderHash / blockSize / resourceCount
      **逐项相同**，且整块 CB 只有 2 个字段不同（o12 实测），所以是 drop-in。
   2. 只改该条目的 `nameHash`（材质项 +4）= `crc32("Outline_Black") ^ 0xFFFFFFFF`
      —— 语料实测的材质名哈希公式（2738/2738，见调研 §5）。
-  3. 按 Alf 描边模板设置资源指向：
-       tAlbedoMap / tEmissiveMap   -> `Assets\\default_tex\\null_black`（平黑；Alf 的 wst/Outline 就是这么写的）
+  3. 按 参考件 描边模板设置资源指向：
+       tAlbedoMap / tEmissiveMap   -> `Assets\\default_tex\\null_black`（平黑；参考件 的 wst/Outline 就是这么写的）
        tNormalMap / tDetailNormalMap -> `Assets\\default_tex\\null_NM`
        tRMTMap                     -> `Assets\\default_tex\\null_RMT`
        tColorMaskMap / tFxMap / tFurVelocityMap -> `Assets\\default_tex\\null_black`
        tFurMap                     -> `Assets\\default_tex\\noise_LIN`
        tPanoramaMap                -> `Assets\\default_tex\\null_gray_LIN`
-       tAlbedoBlendMap             -> 沿用（snow_Col_CMM，与 Alf 同）
-  4. 按 Alf 描边模板设置 CB（**用 property_dict 的字段偏移精确写入**，不再用
+       tAlbedoBlendMap             -> 沿用（snow_Col_CMM，与 参考件 同）
+  4. 按 参考件 描边模板设置 CB（**用 property_dict 的字段偏移精确写入**，不再用
      "找 4 个 float 的字节模式"那种做法——那有改错字段的风险）：
-       fBaseMapFactor__uiColor      = 0.2,0.2,0.2,1   （Alf 描边值）
-       fEmissiveMapFactor__uiColor  = 1,1,1           （Alf 描边值；本体是 3）
+       fBaseMapFactor__uiColor      = 0.2,0.2,0.2,1   （参考件 描边值）
+       fEmissiveMapFactor__uiColor  = 1,1,1           （参考件 描边值；本体是 3）
        其余 47 个字段**一个都不动**（含 bBackFaceNormalFilp / iOutlineId —— 实测两个作者都没动）
 
   ★ 绝不动任何活材质：脚本会先算出「该部位 mod3 实际用到的材质名」，
@@ -106,21 +106,21 @@ WANT_TEX = {
     "tPanoramaMap__disclosure":       "Assets\\default_tex\\null_gray_LIN",
     "tAlbedoBlendMap__disclosure":    None,
 }
-# CB 目标值（Alf 描边模板）
+# CB 目标值（参考件 描边模板）
 WANT_CB = {
     "fBaseMapFactor__uiColor":         (0.2, 0.2, 0.2, 1.0),
     "fEmissiveMapFactor__uiColor":     (1.0, 1.0, 1.0),
 }
 # ★ 材质项 56 字节头部里另外两个「渲染状态」字段（不在 CB 里，是材质项自己的字节）。
-#   2026-09-18 第二轮：Alf 的 3 个描边材质 (Outline_Brown / Outline_Red / Outline) 在这一对
+#   2026-09-18 第二轮：参考件 的 3 个描边材质 (Outline_Brown / Outline_Red / Outline) 在这一对
 #   取值上**完全一致**，而我们第一版沿用了死条目的原值 —— 逐字节比对后这是**唯一**还剩下的差异
 #   （CB 全部字段差异 = 0 字节）。插件源码注释把 surfaceCoef[1] 当"背面剔除"相关字段：
 #       blender_mod3_mrl3.py:351  use_backface_culling = (surfaceCoef[1] > 4 not in {0, 14})
 #   —— 那个表达式对任何 ubyte 都恒为 True（是插件自己的 bug），所以插件无法识别真正的语义；
-#   既然"我们的黑壳没被剔除、Alf 的壳被剔除了"是实测现象，就把这两项照抄 Alf。
+#   既然"我们的黑壳没被剔除、参考件 的壳被剔除了"是实测现象，就把这两项照抄 参考件。
 WANT_HDR = {
-    "surfaceCoef": bytes([0x00, 0x11]),      # Alf 描边全部是 0011；我们原来是 00e1
-    "alphaCoefB3": 0x04,                     # Alf 描边 alphaCoef = 00 70 04 04；我们原来是 00 70 04 00
+    "surfaceCoef": bytes([0x00, 0x11]),      # 参考件 描边全部是 0011；我们原来是 00e1
+    "alphaCoefB3": 0x04,                     # 参考件 描边 alphaCoef = 00 70 04 04；我们原来是 00 70 04 00
 }
 FMT = {"float": (4, "f"), "uint": (4, "I"), "int": (4, "i"), "ubyte": (1, "B"),
        "byte": (1, "b"), "bbool": (4, "I")}
@@ -235,7 +235,7 @@ def main():
         # ---- 1) 改 nameHash ----
         struct.pack_into("<I", data, e + 4, OUTLINE_HASH)
 
-        # ---- 1b) 改材质项头部的渲染状态字节（照抄 Alf 的描边材质）----
+        # ---- 1b) 改材质项头部的渲染状态字节（照抄 参考件 的描边材质）----
         hdr_done = []
         old_surf = bytes(data[e + 20:e + 22])
         data[e + 20:e + 22] = WANT_HDR["surfaceCoef"]

@@ -8,7 +8,7 @@
    ★ 导入后对象名会因重名被改：`Tail` → `Tail.003`（preview2 里已有 `Tail`(身体) 与
      `Tail.002`(头发)）⇒ **清单一律按"导入前后对象差集 + 去掉尾部 .NNN"判定，绝不写死名字**。
 
-★ 坐标（`_模组调研\\eku7\\_probe*.txt` 实测）：
+★ 坐标（`本项目调研记录\\\_probe*.txt` 实测）：
   · 本套装 的 `Armature`（162 骨）与 角色 `Armature`（222 骨）逐位同源
     （Hips/Spine/Chest/Neck/Head/Upper_leg.L/…/Little Distal.L **差 0.000000 m**）
     ⇒ **SCALE = 1.0、不配准、不缩放**（比 第6版 的 3.5mm 还干净）。
@@ -32,7 +32,7 @@
   *_X3_preview.txt   给人看：集合清单 / 逐件 / 顶点组全表（Σw 排序）/ 材质->贴图 / 骨架对拍 /
                      贴合度 / 形态键 basis vs 求值 / 链候选几何 / 鞋底剖面
 
-用法: blender -b "eku\\1\\preview2\\eku_preview2.blend" --python X1_采集_本套头发.py -- <out.json>
+用法: blender -b "<你的预览工程.blend>" --python X1_采集_本套头发.py -- <out.json>
 """
 
 # ============================================================================
@@ -367,13 +367,13 @@ for a in ARMS:
                            parent=(b.parent.name if b.parent else None))
     out["arm_bones"][a.name] = rec
 
-eku = out["arm_bones"].get("Armature")
+base = out["arm_bones"].get("Armature")
 for cname, lab in ((CLOTH_ARM, "本套"), ("Armature.004", "头发")):
     rec = out["arm_bones"].get(cname)
-    if rec is None or eku is None:
+    if rec is None or base is None:
         continue
-    same = [k for k in rec if k in eku]
-    dd = [np.linalg.norm(np.array(rec[k]["head"]) - np.array(eku[k]["head"])) for k in same]
+    same = [k for k in rec if k in base]
+    dd = [np.linalg.norm(np.array(rec[k]["head"]) - np.array(base[k]["head"])) for k in same]
     if not same:
         w("   [%s] %s：骨 %d，与 角色 **0 个同名骨** ⇒ 另一套骨名，网格直接按世界坐标用（SCALE=1.0）"
           % (lab, cname, len(rec)))
@@ -381,15 +381,15 @@ for cname, lab in ((CLOTH_ARM, "本套"), ("Armature.004", "头发")):
         dd.sort()
         w("   [%s] %s：骨 %d，与 角色 同名 %d 个；head 距离 max %.6f 中位 %.6f" %
           (lab, cname, len(rec), len(same), max(dd), float(np.median(dd))))
-        bad = sorted([(np.linalg.norm(np.array(rec[k]["head"]) - np.array(eku[k]["head"])), k)
+        bad = sorted([(np.linalg.norm(np.array(rec[k]["head"]) - np.array(base[k]["head"])), k)
                       for k in same], reverse=True)[:8]
         w("        差最大的 8 根：%s" % ["%s %.4f" % (k, v) for v, k in bad])
         w("        ⇒ 判定：%s" % ("★ 逐位同源（差 0.000000 m 档）⇒ SCALE=1.0、不配准"
                                   if max(dd) < 1e-4 else
                                   ("基本同源" if max(dd) < 0.03 else "!! 需要配准，见 X4_对齐体检")))
-only_c = sorted(set(out["arm_bones"].get(CLOTH_ARM, {})) - set(eku or {}))
+only_c = sorted(set(out["arm_bones"].get(CLOTH_ARM, {})) - set(base or {}))
 w("   本套 独有骨（%d）：%s" % (len(only_c), only_c))
-only_h = sorted(set(out["arm_bones"].get("Armature.004", {})) - set(eku or {}))
+only_h = sorted(set(out["arm_bones"].get("Armature.004", {})) - set(base or {}))
 w("   头发 独有骨（%d）：%s" % (len(only_h), only_h))
 
 # ================= ⑦ 贴合度 =================

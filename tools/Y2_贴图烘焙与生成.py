@@ -12,7 +12,7 @@
    GLOVE <- 源**无贴图**，源 `Gloves/4. Sky Blue.mat _BaseColor` = (0.6667,0.859,1.0) ⇒ 生成纯色
    HAIR  <- 第1版/hair/HAIR_PACK_DIR/PNG/Yellow.png   4096²  头发（Yellow）
    ACC   <- 同上目录 /PNG/Accessories.png                 4096²  发饰
-   ★★ 源图目录是**本工程内**的 `eku\\7\\服装素材\\贴图\\`（作者脚本引用的
+   ★★ 源图目录是**本工程内**的 `素材\\贴图\\`（作者脚本引用的
      unity3d 解包路径另有一份，内容相同）；这是本版**新增**的东西（前六版都用 第1版/cloth 的 resolved）。
    ★ 纯色图的取值 = **把源 baseColor（线性）转成 sRGB 再存** —— 因为我们的 .tex 是
      BC7_UNORM_**SRGB**（format 31），游戏采样时会 sRGB→线性解回来 ⇒ 这样预览里看到的灰度才能复现。

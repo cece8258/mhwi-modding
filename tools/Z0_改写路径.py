@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Z0_改写路径.py（第7版）—— 把从 第6版/project 拷来的脚本里的工程路径批量改成 第7版/project。
-★ 只改"工程目录"这一种路径（`eku\\N\\project`）；`eku\\1\\preview2`、`eku\\2\\素材` 等
+★ 只改"工程目录"这一种路径（`<根目录名>\\\\N\\\\project`）；`<根目录名>\\\\1\\\\preview2`、`<根目录名>\\\\2\\\\素材` 等
   参考模组/素材源保持不动。
 ★ 保留原编码（utf-8）与换行不动，只做字符串替换。幂等。
 用法： python Z0_改写路径.py [--check]
@@ -23,12 +23,13 @@ import io, os, glob, sys
 
 BASE = PROJ
 BS = "\\"
-TGT = "7"
+TGT = "7"                      # ← 目标版本号
+ROOT_NAME = "proj"             # ← 你的工程根目录名（脚本里写成 <根目录名>\<版本>\project）
 PAIRS = []
 for _old in ("6", "5", "4", "3", "2"):
-    PAIRS.append(("eku" + BS + _old + BS + "project", "eku" + BS + TGT + BS + "project"))
-    PAIRS.append(("eku/" + _old + "/project", "eku/" + TGT + "/project"))
-    PAIRS.append(("eku" + BS * 2 + _old + BS * 2 + "project", "eku" + BS * 2 + TGT + BS * 2 + "project"))
+    PAIRS.append((ROOT_NAME + BS + _old + BS + "project", ROOT_NAME + BS + TGT + BS + "project"))
+    PAIRS.append((ROOT_NAME + "/" + _old + "/project", ROOT_NAME + "/" + TGT + "/project"))
+    PAIRS.append((ROOT_NAME + BS * 2 + _old + BS * 2 + "project", ROOT_NAME + BS * 2 + TGT + BS * 2 + "project"))
 
 CHECK = "--check" in sys.argv
 files = sorted(glob.glob(os.path.join(BASE, "*.py"))) + sorted(glob.glob(os.path.join(BASE, "*.sh")))
